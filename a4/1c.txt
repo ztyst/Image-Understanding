@@ -1,0 +1,70 @@
+def main():
+    HOME_LOCATION = (X0,Y0,Z0)
+    for every 20 degree:
+        rotate robot
+        len1 capture image0, append to image0_list
+        len2 capture image0_2, append to image0_2_list
+    image0_pano = getPanorama(image0_list)
+    image0_2_pano = getPanorama(image0_2_list)
+    cannyEdgeDetection(image0_list)
+    save location of sidelines
+    dection_ball_dict = detect ball using tensorflow
+    filtered_ball_dict = filterDectionWithTopScore(dection_ball_dict)
+    depth = getDepth(camera_calibration,image0_pano,image0_2_pano)
+    (X,Y,Z) = cacluate3DLocation(filtered_ball_dict,depth)
+    toHome = false
+    
+    while 1:
+        wait 2 seconds
+        if current_location == HOME_LOCATION:
+            victoryDanceAtLocation(HOME_LOCATION)
+            toHome = false
+        
+        # if the robot is not on the way to home
+        if ! toHome:
+            len1 capture image1
+            len2 capture image2
+            dection_ball_dict = detect ball using tensorflow
+            filtered_ball_dict = filterDectionWithTopScore(dection_ball_dict)
+            depth = getDepth(camera_calibration,image1,image2)
+            (X2,Y2,Z2) = cacluate3DLocation(filtered_dict,depth)
+            #set destination
+            destination = (X2,Y2,Z2)
+
+
+            # if the ball is reachable by robot, pick it up directly
+            if Z2 <= 0.5:
+                grabObject((X2,Y2,Z2))
+                #move back to home
+                #assume players will wait for robot when it is going home
+                toHome = true
+                moveToLocation(HOME_LOCATION)
+
+
+            # if ball is rolling on the floor
+            # compare ball location from last images
+            elif distanceBetween((X,Y,Z),(X2,Y2,Z2)) > 0.5:
+                # update ball location
+                (X,Y,Z) = (X2,Y2,Z2)
+                continue
+
+            # always need to check if robot movement will interference players
+            detection_playing_dict = detect playing player using tensorflow
+            (HX,HY,HZ) = cacluate3DLocation(detection_playing_dict)
+
+            #player is playing
+            if detection_playing_dict["score"] >= 0.8 and (X2,Y2,Z2) in sidelines:
+                # update ball location
+                (X,Y,Z) = (X2,Y2,Z2)
+                continue
+
+            # if player and ball are on the same line
+            if (HX,HY,HZ) in same direction (X2,Y2,Z2): # assume player gives way to robot afterwards
+                # update ball location
+                (X,Y,Z) = (X2,Y2,Z2)
+                continue
+
+            #move to destination that has been set before
+            moveToLocation((X2,Y2,Z2))
+            # update ball location
+            (X,Y,Z) = (X2,Y2,Z2)
