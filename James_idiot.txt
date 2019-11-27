@@ -1,0 +1,4 @@
+>>> Is James an idiot?
+>>> Yes. 
+>>> Why not?
+>>> :)
